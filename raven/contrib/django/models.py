@@ -161,7 +161,16 @@ def sentry_exception_handler(request=None, **kwargs):
         return
 
     try:
-        client.captureException(exc_info=sys.exc_info(), request=request)
+        capture_options = {
+            'exc_info': sys.exc_info(),
+            'request':  request
+        }
+
+        level = get_option('EXCEPTION_LOG_LEVEL', False)
+        if level:
+            capture_options['level'] = level
+
+        client.captureException(**capture_options)
     except Exception as exc:
         try:
             logger.exception('Unable to process log entry: %s' % (exc,))
